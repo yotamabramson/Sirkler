@@ -1,8 +1,15 @@
-from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 import os
 from django.template.loader import get_template
+import random
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Circle, Membership, Post
+from .forms import CircleForm, PostForm
+from django.utils.safestring import mark_safe
+import json
+
 
 # Welcome Page
 def welcome(request):
@@ -42,20 +49,13 @@ def logout_view(request):
     logout(request)
     return redirect('welcome')  # Redirect to the welcome page after logout
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Circle, Membership, Post
-from .forms import CircleForm, PostForm
-
 
 @login_required
 def home(request):
-    my_circles = Circle.objects.filter(membership__user=request.user)
-    global_circles = Circle.objects.exclude(membership__user=request.user)
-    return render(request, 'home.html', {
-        'my_circles': my_circles,
-        'global_circles': global_circles,
-    })
+    user_circles = Circle.objects.filter(membership__user=request.user)
+    colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A6", "#A633FF", "#33FFF5"]
+    circles = [{"name": circle.name, "color": random.choice(colors)} for circle in user_circles]
+    return (render(request, 'home.html', {"circles": mark_safe(json.dumps(circles))}))
 
 @login_required
 def circle_detail(request, circle_id):
