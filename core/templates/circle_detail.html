@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ circle.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            display: flex;
+            padding: 10px;
+        }
+        .navbar a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .circle-header {
+            text-align: center;
+        }
+        .circle-header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .circle-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .members, .posts {
+            margin-top: 20px;
+        }
+        .members h2, .posts h2 {
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 5px;
+            color: #555;
+        }
+        .member-list, .post-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .member-list li, .post-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .post-form {
+            margin-top: 20px;
+        }
+        .post-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .post-form button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .post-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="#">Circles</a>
+        <a href="#">Explore</a>
+        <a href="#">Profile</a>
+    </div>
+    <div class="content">
+        <div class="circle-header">
+            <h1>{{ circle.name }}</h1>
+            <p>Formed on {{ circle.created_at|date:"d.m.Y" }}</p>
+            <p>{{ circle.members.count }} members</p>
+        </div>
+
+        {% if not user_is_member %}
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" name="join_circle">Join Circle</button>
+            </form>
+        {% endif %}
+
+        <div class="members">
+            <h2>Members</h2>
+            <ul class="member-list">
+                {% for membership in members %}
+                    <li>{{ membership.user.username }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="posts">
+            <h2>Posts</h2>
+            <ul class="post-list">
+                {% for post in posts %}
+                    <li>
+                        <strong>{{ post.author.username }}</strong>: {{ post.content }}
+                        <br><small>Posted on {{ post.created_at|date:"d.m.Y H:i" }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% if user_is_member %}
+            <div class="post-form">
+                <h3>Add a Post</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Post</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
